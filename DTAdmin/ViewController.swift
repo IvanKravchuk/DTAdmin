@@ -1,0 +1,32 @@
+//
+//  ViewController.swift
+//  DTAdmin
+//
+//  Created by ITA student on 10/10/17.
+//  Copyright © 2017 if-ios-077. All rights reserved.
+//
+
+import UIKit
+
+class ViewController: UIViewController {
+    
+    
+    @IBAction func testButtonTapped(_ sender: Any) {
+        let storyboard = UIStoryboard(name: "GroupStoryboard", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "groupVC") as UIViewController
+        present(vc, animated: true, completion: nil)
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
+
+}
+
