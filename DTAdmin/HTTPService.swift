@@ -7,15 +7,6 @@
 //
 
 import Foundation
-//
-//  Auth.swift
-//  HTTPTestProject
-//
-//  Created by Admin on 12.10.17.
-//  Copyright © 2017 kravchuk. All rights reserved.
-//
-
-import Foundation
 
 class HTTPService {
     //    static func login (userName:String, password:String){
@@ -120,12 +111,9 @@ class HTTPService {
         task.resume()
     }
     
-    //    static func postData (entityName:String,entityDictionary:[String:Any]){
-    static func postData (){
+    static func postData<T:Encodable> (entityName:String,entityObject:T){
         let sessionValue =  UserDefaults.standard.object(forKey: "session") as! String
-        print(sessionValue)
-        //        let urlString = "http://vps9615.hyperhost.name/" + entityName + "/insertData"
-        let urlString = "http://vps9615.hyperhost.name/speciality/insertData"
+        let urlString = "http://vps9615.hyperhost.name/" + entityName + "/insertData"
         let url = URL(string: urlString)!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -133,29 +121,53 @@ class HTTPService {
         request.addValue("UTF-8", forHTTPHeaderField: "Charset")
         request.setValue("session=\(sessionValue)", forHTTPHeaderField: "Cookie")
         
-        let newGroup = Speciality(speciality_id: "-1", speciality_code: "6.233", speciality_name: "name")
-        //        let groupParam = ["group_id":"-1", "group_name": "new group", "faculty_id": "1", "speciality_id": "1"]
-        
         do {
-            let jsonBody = try JSONEncoder().encode(newGroup)
-            //            let jsonBody = try JSONSerialization.data(withJSONObject: groupParam, options: [])
+            let jsonBody = try JSONEncoder().encode(entityObject)
             request.httpBody = jsonBody
         } catch {
             
         }
-        //        let jsonDictionary = NSMutableDictionary()
-        //        for (key,value) in entityDictionary{
-        //            jsonDictionary.setValue(value, forKey: key)
-        //        }
-        //
-        //        let jsonData:Data
-        //        do {
-        //           jsonData = try JSONSerialization.data(withJSONObject: jsonDictionary, options: JSONSerialization.WritingOptions())
-        //            request.httpBody = jsonData
-        //        } catch  {
+        let session = URLSession.shared
         
-        //        }
+        let task = session.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil else {
+                print("error=\(String(describing: error))")
+                return
+            }
+            print("data = \(String(describing: data))")
+            
+            do {
+                let json = try JSONSerialization.jsonObject(with: data, options: [])
+                print("post json")
+                print(json)
+            }catch{
+                
+            }
+            
+            if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {
+                print("statusCode should be 200, but is \(httpStatus.statusCode)")
+                print("response = \(String(describing: response))")
+            }
+        }
+        task.resume()
+    }
+    
+    static func putData<T:Encodable> (entityName:String,id:String,entityObject:T){
+        let sessionValue =  UserDefaults.standard.object(forKey: "session") as! String
+        let urlString = "http://vps9615.hyperhost.name/" + entityName + "/update" + id
+        let url = URL(string: urlString)!
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("UTF-8", forHTTPHeaderField: "Charset")
+        request.setValue("session=\(sessionValue)", forHTTPHeaderField: "Cookie")
         
+        do {
+            let jsonBody = try JSONEncoder().encode(entityObject)
+            request.httpBody = jsonBody
+        } catch {
+            
+        }
         let session = URLSession.shared
         
         let task = session.dataTask(with: request) { data, response, error in
@@ -187,7 +199,7 @@ class HTTPService {
         let urlString = "http://vps9615.hyperhost.name/" + entityName + "/del/" + id
         let url = URL(string: urlString)!
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = "DELETE"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("UTF-8", forHTTPHeaderField: "Charset")
         request.setValue("session=\(sessionValue)", forHTTPHeaderField: "Cookie")
@@ -245,7 +257,7 @@ class HTTPService {
             for group in groups {
                 var newGroup:[String:Any] = [:]
                 newGroup["group_name"] = group.group_name
-                newGroup["group_id"] = group.group_id
+//                newGroup["group_id"] = group.group_id
                 newGroup["faculty_id"] = group.faculty_id
                 newGroup["speciality_id"] = group.speciality_id
                 for faculty in faculties {
